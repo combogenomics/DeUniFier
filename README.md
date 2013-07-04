@@ -4,7 +4,7 @@
 
 If you have maven installed on your system you can skip the first pass:
 
-1. Download and install maven from [http://maven.apache.org/]<http://maven.apache.org/>
+1. Download and install maven from [http://maven.apache.org/](http://maven.apache.org/ "Maven Home")
 
 2. Download this repository using the button "Download ZIP" at the bottom right of the github page
 
