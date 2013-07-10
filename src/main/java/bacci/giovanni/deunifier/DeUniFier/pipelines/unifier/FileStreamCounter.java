@@ -25,16 +25,33 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.Semaphore;
 
+/**
+ * Implementation of a {@link FileCounter}. This class stream one by one all the
+ * sequences and reconstructs a frequency table. This implementation is very
+ * slow.
+ * 
+ * @author <a href="http://www.unifi.it/dblage/CMpro-v-p-65.html">Giovanni
+ *         Bacci</a>
+ * 
+ */
 public class FileStreamCounter extends FileCounter {
 	private String[] tags = null;
 	private Map<String, List<Long>> scannedMap = null;
 	private Semaphore semaphore = null;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param list
+	 *            @see FileCounter#FileCounter(List)
+	 * @param numThread
+	 *            number of thread that this class con use
+	 */
 	public FileStreamCounter(List<Path> list, int numThread) {
 		super(list);
 		this.tags = new String[list.size()];
 		for (int i = 0; i < list.size(); i++) {
-			this.tags[i] = ((Path) list.get(i)).getFileName().toString();
+			this.tags[i] = list.get(i).getFileName().toString();
 		}
 		this.scannedMap = new HashMap<String, List<Long>>();
 		for (String s : this.tags) {
@@ -43,6 +60,9 @@ public class FileStreamCounter extends FileCounter {
 		this.semaphore = new Semaphore(numThread);
 	}
 
+	/**
+	 * @see FileCounter#writeOutput(SequenceWriter, FrequencyWriter, Writer)
+	 */
 	public void writeOutput(SequenceWriter wr, FrequencyWriter tableWriter,
 			Writer idWriter) throws IOException {
 		boolean header = true;
@@ -50,10 +70,10 @@ public class FileStreamCounter extends FileCounter {
 		for (int i = 0; i < this.pathList.size(); i++) {
 			setDoing("Scanning " + this.pathList.get(i) + "...");
 			this.scannedSeq = 0L;
-			BufferedReader br1 = Files.newBufferedReader(
-					(Path) this.pathList.get(i), Charset.defaultCharset());
+			BufferedReader br1 = Files.newBufferedReader(this.pathList.get(i),
+					Charset.defaultCharset());
 			SequenceReader mainReader = new FastaSequenceReader(br1);
-			String t = ((Path) this.pathList.get(i)).getFileName().toString();
+			String t = this.pathList.get(i).getFileName().toString();
 
 			while (mainReader.hasNext()) {
 				Sequence s1 = mainReader.nextSequence(true);
@@ -69,7 +89,7 @@ public class FileStreamCounter extends FileCounter {
 					List<Future<String>> resList = new ArrayList<Future<String>>();
 					BufferedReader br2;
 					for (int m = i; m < this.pathList.size(); m++) {
-						String t1 = ((Path) this.pathList.get(m)).getFileName()
+						String t1 = this.pathList.get(m).getFileName()
 								.toString();
 						br2 = Files.newBufferedReader(this.pathList.get(m),
 								Charset.defaultCharset());
@@ -87,8 +107,10 @@ public class FileStreamCounter extends FileCounter {
 						try {
 							ids.append((String) f.get());
 						} catch (InterruptedException e) {
+							// TODO
 							e.printStackTrace();
 						} catch (ExecutionException e) {
+							// TODO
 							e.printStackTrace();
 						}
 					}
@@ -104,19 +126,46 @@ public class FileStreamCounter extends FileCounter {
 		}
 	}
 
+	/**
+	 * Utility method that check if an indexed sequence with a tag has already
+	 * been scanned.
+	 * 
+	 * @param num
+	 *            the index of the sequence in the sequences' file
+	 * @param tag
+	 *            the tag
+	 * @return <code>true</code> if the sequences has already been scanned or
+	 *         <code>false</code> if it has not
+	 */
 	private synchronized boolean alredyScanned(long num, String tag) {
 		long c = num;
 		return this.scannedMap.get(tag).contains(Long.valueOf(c));
 	}
 
+	/**
+	 * Utility method that set an indexed sequence as scanned
+	 * @param num index of the sequence
+	 * @param tag tag of the sequence
+	 */
 	private synchronized void setScanned(long num, String tag) {
 		this.scannedMap.get(tag).add(new Long(num));
 	}
 
+	/**
+	 * Utility method that clear all records from the two methods {@link #alredyScanned(long, String)}
+	 * and {@link #setScanned(long, String)} for a specified tag
+	 * @param tag the tag
+	 */
 	private synchronized void clearTag(String tag) {
 		this.scannedMap.get(tag).clear();
 	}
 
+	/**
+	 * Utility method that returns a {@link FutureTask} 
+	 * giving a {@link Worker}
+	 * @param w the {@link Worker}
+	 * @return a {@link FutureTask}
+	 */
 	private FutureTask<String> sendFuture(Worker w) {
 		try {
 			this.semaphore.acquire();
@@ -128,6 +177,12 @@ public class FileStreamCounter extends FileCounter {
 		return f;
 	}
 
+	/**
+	 * Utility method that chop the scanned sequence map eliminating all 
+	 * the scanned indexes.
+	 * @param tag the tag
+	 * @param cutoff the index where the pipeline has arrived
+	 */
 	private void chopLower(String tag, long cutoff) {
 		Collections.sort(this.scannedMap.get(tag));
 		List<Long> res = null;
@@ -142,9 +197,20 @@ public class FileStreamCounter extends FileCounter {
 		}
 	}
 
+	/**
+	 * Cannot increment progress because here there is no
+	 * progress limit
+	 */
 	protected void incrementProgress() {
 	}
 
+	/**
+	 * Inner class. This calls is a worker that given a sequence and a tag (normally the file name)
+	 * search that sequence in a file (the tag) and return a string representation of all ids found
+	 * with identitcal sequence.
+	 * @author <a href="http://www.unifi.it/dblage/CMpro-v-p-65.html">Giovanni Bacci</a>
+	 *
+	 */
 	class Worker implements Callable<String> {
 		private String tag = null;
 		private Sequence s = null;
@@ -193,7 +259,7 @@ public class FileStreamCounter extends FileCounter {
 				}
 			}
 			this.br.close();
-			FileStreamCounter.this.semaphore.release();
+			semaphore.release();
 			return ids.toString();
 		}
 	}

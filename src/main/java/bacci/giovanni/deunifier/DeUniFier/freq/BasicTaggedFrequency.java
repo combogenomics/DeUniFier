@@ -41,7 +41,7 @@ public class BasicTaggedFrequency implements TaggedFrequency {
 	public String[] getTags() {
 		String[] tags = new String[this.tags.size()];
 		for (int i = 0; i < tags.length; i++) {
-			tags[i] = ((String) this.tags.get(i));
+			tags[i] = this.tags.get(i);
 		}
 		return tags;
 	}
@@ -67,5 +67,9 @@ public class BasicTaggedFrequency implements TaggedFrequency {
 		}
 		for (String tag : freq.getTags())
 			this.freq.incrementValue(tag, freq.getCount(tag));
+	}
+
+	public void setValue(Comparable<?> paramComparable, long value) {
+		freq.incrementValue(paramComparable, value);				
 	}
 }

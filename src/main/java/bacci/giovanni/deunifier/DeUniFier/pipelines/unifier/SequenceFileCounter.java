@@ -15,15 +15,29 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Observer;
 
+/**
+ * Implementation of a {@link FileCounter}. This class reads a sequences' file in memory and
+ * check only for identical sequences. With this class no id will be reported and the ids 
+ * will be written with new unique names.
+ * 
+ * @author <a href="http://www.unifi.it/dblage/CMpro-v-p-65.html">Giovanni Bacci</a>
+ *
+ */
 public class SequenceFileCounter extends FileCounter {
 	private FrequencyTags freq = null;
 
 	private long uniques;
 
+	/**
+	 * @see FileCounter#FileCounter(List)
+	 * @param list path list
+	 */
 	public SequenceFileCounter(List<Path> list) {
 		super(list);
 		String[] tags = new String[list.size()];
@@ -34,6 +48,11 @@ public class SequenceFileCounter extends FileCounter {
 		this.uniques = 0L;
 	}
 
+	/**
+	 * Method called every time that a {@link Sequence} is scanned. This method send a message
+	 * to all {@link Observer} using a double parameter that ranges from 0.0 to 1.0 where 0.0 
+	 * means that no progress have been done and 1.0 means that the pipeline is finished.
+	 */
 	protected void incrementProgress() {
 		this.scannedSeq += 1L;
 		double prog = 100.0D - (this.uniques - this.scannedSeq)
@@ -42,6 +61,11 @@ public class SequenceFileCounter extends FileCounter {
 		notifyObservers(Double.valueOf(prog));
 	}
 
+	/**
+	 * This method will not write the ids so the {@link Writer} parameter
+	 * could be <code>null</code>
+	 * @see FileCounter#writeOutput(SequenceWriter, FrequencyWriter, Writer).
+	 */
 	public void writeOutput(SequenceWriter wr, FrequencyWriter tableWriter,
 			Writer idWriter) throws IOException {
 		this.scannedSeq = 0L;
@@ -78,6 +102,7 @@ public class SequenceFileCounter extends FileCounter {
 			String id = String.format("unique_sequence.%0" + deep + "d",
 					new Long(this.scannedSeq));
 			Sequence s = new ByteSequence(entry.getKey().getSequence(), id);
+			entry = new AbstractMap.SimpleEntry<Sequence, TaggedFrequency>(s, entry.getValue());
 			wr.writeSequence(s);
 			tableWriter.write(entry, header);
 			header = false;
