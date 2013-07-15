@@ -18,6 +18,9 @@ public abstract class Console {
 		init();
 		while (this.scan.hasNext()) {
 			String line = this.scan.nextLine();
+			if(line.equals("quit")){
+				System.exit(0);
+			}
 			act(line);
 			init();
 		}

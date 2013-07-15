@@ -85,8 +85,8 @@ public class ByteSequence implements Sequence {
 	}
 
 	/**
-	 * Returns the sequence as a {@link Byte[]} 
-	 * @return a {@link Byte[]}
+	 * Returns the sequence as a {@link Byte} array 
+	 * @return a {@link Byte} array
 	 */
 	public Byte[] getByteSeq() {
 		Byte[] arr = new Byte[this.sequence.length];
