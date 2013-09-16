@@ -79,7 +79,7 @@ public class UsearchIterator extends FileAssignmentsIterator<ClustAssignments> {
 	}
 
 	/**
-	 * Utility method that able to return the cluster number given a usearch hit
+	 * Utility method able to return the cluster number given a usearch hit
 	 * as a String
 	 * 
 	 * @param line
