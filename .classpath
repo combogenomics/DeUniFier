@@ -22,5 +22,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/home/giovanni/java_libraries/Apache-Commons/commons-collections4-4.0-alpha1/commons-collections4-4.0-alpha1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

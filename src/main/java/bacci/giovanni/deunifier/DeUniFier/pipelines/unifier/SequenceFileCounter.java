@@ -1,6 +1,6 @@
 package bacci.giovanni.deunifier.DeUniFier.pipelines.unifier;
 
-import bacci.giovanni.deunifier.DeUniFier.freq.BasicFrequencyTag;
+import bacci.giovanni.deunifier.DeUniFier.freq.BasicFrequencyTags;
 import bacci.giovanni.deunifier.DeUniFier.freq.FrequencyTags;
 import bacci.giovanni.deunifier.DeUniFier.freq.TaggedFrequency;
 import bacci.giovanni.deunifier.DeUniFier.io.FastaSequenceReader;
@@ -44,7 +44,7 @@ public class SequenceFileCounter extends FileCounter {
 		for (int i = 0; i < tags.length; i++) {
 			tags[i] = ((Path) list.get(i)).getFileName().toString();
 		}
-		this.freq = new BasicFrequencyTag(tags);
+		this.freq = new BasicFrequencyTags(tags);
 		this.uniques = 0L;
 	}
 

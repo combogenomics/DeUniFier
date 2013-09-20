@@ -111,7 +111,7 @@ public abstract class FileCounter extends Observable {
 	 * 
 	 * @see Observable
 	 * @param doing
-	 *            a String taht will be passed to all the {@link Observer}
+	 *            a String that will be passed to all the {@link Observer}
 	 */
 	protected void setDoing(String doing) {
 		setChanged();

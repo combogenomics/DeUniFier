@@ -10,21 +10,42 @@ import java.util.TreeMap;
 
 /**
  * Basic implementation of a {@link FrequencyTags}.
- * @author <a href="http://www.unifi.it/dblage/CMpro-v-p-65.html">Giovanni Bacci</a>
- *
+ * 
+ * @author <a href="http://www.unifi.it/dblage/CMpro-v-p-65.html">Giovanni
+ *         Bacci</a>
+ * 
  */
-public class BasicFrequencyTag implements FrequencyTags {
+public class BasicFrequencyTags implements FrequencyTags {
 	private static final long serialVersionUID = 7805418309814892623L;
-	private Map<Sequence, TaggedFrequency> freqs = null;
-	private String[] tags = null;
-	private long uniqueCount = 0L;
+	protected Map<Sequence, TaggedFrequency> freqs = null;
+	protected String[] tags = null;
+	protected long uniqueCount = 0L;
 
 	/**
 	 * Constructor specifying the tags to be used for each sequence
-	 * @param tags the tags to be used with each sequence
+	 * 
+	 * @param tags
+	 *            the tags to be used with each sequence
 	 */
-	public BasicFrequencyTag(String[] tags) {
-		this.freqs = new TreeMap<Sequence, TaggedFrequency>();
+	public BasicFrequencyTags(String[] tags) {
+		this.freqs = new TreeMap<Sequence, TaggedFrequency>() {
+			private static final long serialVersionUID = -7716480209808999856L;
+
+			@Override
+			public TaggedFrequency get(Object arg0) {
+				if (arg0 instanceof Sequence) {
+					for (Sequence key : this.keySet()) {
+						if(key.compareTo((Sequence)arg0) == 0){
+							return super.get(arg0);
+						}
+					}
+				}else{
+					return super.get(arg0);
+				}
+				return null;
+			}
+
+		};
 		this.tags = tags;
 	}
 
@@ -52,7 +73,7 @@ public class BasicFrequencyTag implements FrequencyTags {
 	public long getCount(Sequence seq, String tag) {
 		Sequence s = seq;
 		TaggedFrequency f = this.freqs.get(s);
-		if(f == null){
+		if (f == null) {
 			return 0;
 		}
 		return f.getCount(tag);
